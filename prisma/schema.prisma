@@ -1,0 +1,170 @@
+
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ============================================================
+// ENUMS
+// ============================================================
+
+enum Status {
+  PENDING
+  PUBLISHED
+}
+
+enum DestinationType {
+  playa
+  naturaleza
+  aventura
+  cultura
+  museo
+  comida
+  parque
+  tienda
+  montana
+}
+
+enum FavoriteType {
+  DESTINATION
+  BLOG
+}
+
+// ============================================================
+// MODELS
+// ============================================================
+
+/// Usuarios autenticados vía Google OAuth2
+model User {
+  id            String    @id @default(cuid())
+  googleId      String    @unique
+  name          String
+  email         String    @unique
+  foto          String?
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  destinations  Destination[]
+  blogs         Blog[]
+  favorites     Favorite[]
+  verificationCodes VerificationCode[]
+
+  @@map("users")
+}
+
+/// Provincias de República Dominicana
+model Province {
+  id          String   @id // slug: "santo-domingo"
+  name        String
+  region      String
+  description String
+  color       String
+
+  // Relations
+  destinations Destination[]
+  blogs        Blog[]
+
+  @@map("provinces")
+}
+
+/// Destinos turísticos (Puntos de Interés)
+model Destination {
+  id            String          @id @default(cuid())
+  slug          String          @unique
+  name          String
+  type          DestinationType
+  price         String          // "gratis" | "pagado"
+  description   String
+  image         String          // URL imagen principal
+  images        String[]        // URLs galería adicional
+  tags          String[]        // Etiquetas: ["historia", "cultura"]
+  hoursWeekdays String?         @map("hours_weekdays")
+  hoursWeekend  String?         @map("hours_weekend")
+  website       String?
+  status        Status          @default(PENDING)
+  publishedAt   DateTime?       @map("published_at")
+  createdAt     DateTime        @default(now()) @map("created_at")
+  updatedAt     DateTime        @updatedAt @map("updated_at")
+
+  // Relations
+  provinceId    String          @map("province_id")
+  province      Province        @relation(fields: [provinceId], references: [id])
+  authorId      String          @map("author_id")
+  author        User            @relation(fields: [authorId], references: [id])
+  blogs         Blog[]
+  favorites     Favorite[]
+  verificationCodes VerificationCode[]
+
+  @@map("destinations")
+}
+
+/// Entradas del blog de viajeros
+model Blog {
+  id            String   @id @default(cuid())
+  slug          String   @unique
+  title         String
+  excerpt       String
+  content       String   // HTML o Markdown
+  category      String   // "Aventura", "Cultura", "Naturaleza"
+  images        String[] // URLs de imágenes del post
+  status        Status   @default(PENDING)
+  publishedAt   DateTime? @map("published_at")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  authorId      String   @map("author_id")
+  author        User     @relation(fields: [authorId], references: [id])
+  provinceId    String?  @map("province_id")
+  province      Province? @relation(fields: [provinceId], references: [id])
+  destinationId String?  @map("destination_id")
+  destination   Destination? @relation(fields: [destinationId], references: [id])
+  favorites     Favorite[]
+  verificationCodes VerificationCode[]
+
+  @@map("blogs")
+}
+
+/// Favoritos polimórficos: puede guardar Destinos o Blogs
+model Favorite {
+  id            String       @id @default(cuid())
+  type          FavoriteType // "DESTINATION" | "BLOG"
+  createdAt     DateTime     @default(now()) @map("created_at")
+
+  // Relations
+  userId        String       @map("user_id")
+  user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  destinationId String?      @map("destination_id")
+  destination   Destination? @relation(fields: [destinationId], references: [id], onDelete: Cascade)
+  blogId        String?      @map("blog_id")
+  blog          Blog?        @relation(fields: [blogId], references: [id], onDelete: Cascade)
+
+  // A user can only favorite the same resource once
+  @@unique([userId, destinationId])
+  @@unique([userId, blogId])
+  @@map("favorites")
+}
+
+/// Códigos OTP de 6 dígitos para verificación de recursos pendientes
+model VerificationCode {
+  id            String   @id @default(cuid())
+  code          String   // 6-digit OTP code
+  expiresAt     DateTime @map("expires_at")
+  used          Boolean  @default(false)
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  // Relations (one of these will be filled, not both)
+  userId        String   @map("user_id")
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  destinationId String?  @map("destination_id")
+  destination   Destination? @relation(fields: [destinationId], references: [id], onDelete: Cascade)
+  blogId        String?  @map("blog_id")
+  blog          Blog?    @relation(fields: [blogId], references: [id], onDelete: Cascade)
+
+  @@map("verification_codes")
+}
