@@ -5,7 +5,7 @@ export const createBlogSchema = z.object({
   excerpt: z.string().min(20, 'El resumen debe tener al menos 20 caracteres').max(300),
   content: z.string().min(100, 'El contenido debe tener al menos 100 caracteres'),
   category: z.string().min(1, 'La categoría es requerida'),
-  images: z.array(z.string().url()).min(1, 'Agrega al menos 1 imagen').max(10),
+  images: z.array(z.string()).min(1, 'Agrega al menos 1 imagen').max(10),
   provinceId: z.string().optional(),
   destinationId: z.string().optional(),
 });
@@ -19,6 +19,7 @@ export const blogQuerySchema = z.object({
   category: z.string().optional(),
   search: z.string().optional(),
   provinceId: z.string().optional(),
+  slug: z.string().optional(),
   page: z.coerce.number().min(1).default(1),
   limit: z.coerce.number().min(1).max(50).default(12),
 });

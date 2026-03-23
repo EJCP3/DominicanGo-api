@@ -14,11 +14,12 @@ const slugify = (s: string): string =>
     .replace(/(^-|-$)/g, '');
 
 export const listBlogs = async (query: BlogQuery) => {
-  const { category, search, provinceId, page, limit } = query;
+  const { category, search, provinceId, slug, page, limit } = query;
   const skip = (page - 1) * limit;
 
   const where: Prisma.BlogWhereInput = {
     status: 'PUBLISHED',
+    ...(slug && { slug }),
     ...(category && { category: { equals: category, mode: Prisma.QueryMode.insensitive } }),
     ...(provinceId && { provinceId }),
     ...(search && {
@@ -60,11 +61,8 @@ export const createBlog = async (
   }
 
   const blog = await prisma.blog.create({
-    data: { ...dto, slug, authorId: userId, status: 'PENDING' },
+    data: { ...dto, slug, authorId: userId, status: 'PUBLISHED', publishedAt: new Date() },
   });
-
-  const code = await createVerificationCode(userId, blog.id, 'blog');
-  await sendVerificationEmail(userEmail, code, blog.title);
 
   return blog;
 };
