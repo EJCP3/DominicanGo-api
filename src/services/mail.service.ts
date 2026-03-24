@@ -50,7 +50,7 @@ export const sendVerificationEmail = async (
 ): Promise<void> => {
   await sendMail({
     to,
-    subject: `🌴 Tu código de verificación DominicanGo: ${code}`,
+    subject: ` Tu código de verificación DominicanGo: ${code}`,
     html: `
       <!DOCTYPE html>
       <html lang="es">
@@ -66,13 +66,11 @@ export const sendVerificationEmail = async (
               <table width="560" cellpadding="0" cellspacing="0" style="background:#ffffff; border-radius:12px; overflow:hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
                 <!-- Header -->
                 <tr>
-                  <td style="background: linear-gradient(135deg, #0ea5e9, #22c55e); padding: 32px; text-align:center;">
+                  <td style="background: #0ea5e9; padding: 32px; text-align:center;">
                     <h1 style="margin:0; color:#ffffff; font-size:28px; font-weight:800; letter-spacing:-0.5px;">
-                      🌴 DominicanGo
+                       DominicanGo
                     </h1>
-                    <p style="margin:8px 0 0; color:rgba(255,255,255,0.85); font-size:14px;">
-                      Directorio Turístico de República Dominicana
-                    </p>
+                   
                   </td>
                 </tr>
                 <!-- Body -->
@@ -95,7 +93,7 @@ export const sendVerificationEmail = async (
                       </p>
                     </div>
                     <p style="margin:0; color:#94a3b8; font-size:13px; text-align:center;">
-                      ⏱️ Este código expira en <strong>15 minutos</strong>. No lo compartas con nadie.
+                      Este código expira en <strong>15 minutos</strong>. No lo compartas con nadie.
                     </p>
                   </td>
                 </tr>

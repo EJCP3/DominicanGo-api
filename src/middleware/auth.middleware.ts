@@ -8,6 +8,7 @@ declare global {
       id: string;
       email: string;
       name: string;
+      foto?: string | null;
     }
   }
 }
@@ -34,7 +35,7 @@ export const requireAuth = async (
       return;
     }
 
-    req.user = { id: user.id, email: user.email, name: user.name };
+    req.user = { id: user.id, email: user.email, name: user.name, foto: user.foto };
     next();
   } catch {
     res.status(401).json({ success: false, message: 'No autorizado. Token inválido o expirado.' });
