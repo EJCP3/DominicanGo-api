@@ -32,6 +32,12 @@ enum DestinationType {
 enum FavoriteType {
   DESTINATION
   BLOG
+  COMMENT
+}
+
+enum ReactionType {
+  LIKE
+  DISLIKE
 }
 
 // ============================================================
@@ -53,6 +59,8 @@ model User {
   blogs         Blog[]
   favorites     Favorite[]
   verificationCodes VerificationCode[]
+  reactions     Reaction[]
+  comments      Comment[]
 
   @@map("users")
 }
@@ -99,6 +107,8 @@ model Destination {
   blogs         Blog[]
   favorites     Favorite[]
   verificationCodes VerificationCode[]
+  reactions     Reaction[]
+  comments      Comment[]
 
   @@map("destinations")
 }
@@ -126,6 +136,8 @@ model Blog {
   destination   Destination? @relation(fields: [destinationId], references: [id])
   favorites     Favorite[]
   verificationCodes VerificationCode[]
+  reactions     Reaction[]
+  comments      Comment[]
 
   @@map("blogs")
 }
@@ -167,4 +179,58 @@ model VerificationCode {
   blog          Blog?    @relation(fields: [blogId], references: [id], onDelete: Cascade)
 
   @@map("verification_codes")
+}
+
+// ============================================================
+// INTERACTIONS (REACTIONS AND COMMENTS)
+// ============================================================
+
+/// Reacciones (Me gusta / No me gusta)
+model Reaction {
+  id            String       @id @default(cuid())
+  type          ReactionType
+  createdAt     DateTime     @default(now()) @map("created_at")
+
+  // Target Polymorphism
+  targetType    FavoriteType @map("target_type") // Reusing FavoriteType to mean DESTINATION | BLOG | COMMENT
+  destinationId String?      @map("destination_id")
+  destination   Destination? @relation(fields: [destinationId], references: [id], onDelete: Cascade)
+  blogId        String?      @map("blog_id")
+  blog          Blog?        @relation(fields: [blogId], references: [id], onDelete: Cascade)
+  commentId     String?      @map("comment_id")
+  comment       Comment?     @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  // Author
+  userId        String       @map("user_id")
+  user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Un usuario solo puede reaccionar una vez por entidad
+  @@unique([userId, destinationId])
+  @@unique([userId, blogId])
+  @@unique([userId, commentId])
+  @@map("reactions")
+}
+
+/// Comentarios de Usuarios
+model Comment {
+  id            String       @id @default(cuid())
+  content       String       @db.Text
+  createdAt     DateTime     @default(now()) @map("created_at")
+  updatedAt     DateTime     @updatedAt @map("updated_at")
+
+  // Target Polymorphism
+  targetType    FavoriteType @map("target_type")
+  destinationId String?      @map("destination_id")
+  destination   Destination? @relation(fields: [destinationId], references: [id], onDelete: Cascade)
+  blogId        String?      @map("blog_id")
+  blog          Blog?        @relation(fields: [blogId], references: [id], onDelete: Cascade)
+
+  // Author
+  userId        String       @map("user_id")
+  user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Reactions to this comment
+  reactions     Reaction[]
+
+  @@map("comments")
 }

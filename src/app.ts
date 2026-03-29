@@ -12,6 +12,7 @@ import usersRouter from './modules/users/users.router';
 import destinationsRouter from './modules/destinations/destinations.router';
 import blogsRouter from './modules/blogs/blogs.router';
 import favoritesRouter from './modules/favorites/favorites.router';
+import interactionsRouter from './modules/interactions/interactions.router';
 
 // ── App ────────────────────────────────────────────────────────────────────
 const app = express();
@@ -56,6 +57,7 @@ app.use('/api/users', usersRouter);
 app.use('/api/destinations', destinationsRouter);
 app.use('/api/blogs', blogsRouter);
 app.use('/api/favorites', favoritesRouter);
+app.use('/api/interactions', interactionsRouter);
 
 // ── 404 Handler ───────────────────────────────────────────────────────────
 app.use((_req, res) => {
