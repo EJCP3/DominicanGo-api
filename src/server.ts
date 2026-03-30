@@ -8,7 +8,7 @@ const startServer = async () => {
     await prisma.$connect();
     console.log('✅ Conectado a la base de datos PostgreSQL');
 
-    app.listen(env.PORT, () => {
+    app.listen(env.PORT, '0.0.0.0', () => {
       console.log(`
 ╔════════════════════════════════════════╗
 ║    🌴  DominicanGo API - Iniciado     ║

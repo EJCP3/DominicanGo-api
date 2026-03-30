@@ -40,6 +40,24 @@ enum ReactionType {
   DISLIKE
 }
 
+enum Role {
+  USER
+  ADMIN
+}
+
+enum FeedbackType {
+  SUGGESTION
+  BUG
+  DELETION_REQUEST
+  OTHER
+}
+
+enum FeedbackStatus {
+  PENDING
+  REVIEWED
+  RESOLVED
+}
+
 // ============================================================
 // MODELS
 // ============================================================
@@ -51,10 +69,12 @@ model User {
   name          String
   email         String    @unique
   foto          String?
+  role          Role      @default(USER)
   createdAt     DateTime  @default(now()) @map("created_at")
   updatedAt     DateTime  @updatedAt @map("updated_at")
 
   // Relations
+  feedbacks     Feedback[]
   destinations  Destination[]
   blogs         Blog[]
   favorites     Favorite[]
@@ -233,4 +253,23 @@ model Comment {
   reactions     Reaction[]
 
   @@map("comments")
+}
+
+/// Sugerencias, Reportes de Error o Solicitudes de Eliminación
+model Feedback {
+  id            String         @id @default(cuid())
+  type          FeedbackType
+  status        FeedbackStatus @default(PENDING)
+  title         String?
+  content       String         @db.Text
+  resourceId    String?        @map("resource_id") // Opcional, para referenciar un blog o destino al solicitar borrar
+  resourceType  String?        @map("resource_type") // "DESTINATION" o "BLOG"
+  createdAt     DateTime       @default(now()) @map("created_at")
+  updatedAt     DateTime       @updatedAt @map("updated_at")
+
+  // Author (opcional: usuarios anónimos pueden enviar feedback general)
+  userId        String?        @map("user_id")
+  user          User?          @relation(fields: [userId], references: [id])
+
+  @@map("feedbacks")
 }

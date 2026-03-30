@@ -27,3 +27,6 @@ export const blogQuerySchema = z.object({
 export type CreateBlogDto = z.infer<typeof createBlogSchema>;
 export type VerifyBlogDto = z.infer<typeof verifyBlogSchema>;
 export type BlogQuery = z.infer<typeof blogQuerySchema>;
+
+export const updateBlogSchema = createBlogSchema.partial();
+export type UpdateBlogDto = z.infer<typeof updateBlogSchema>;

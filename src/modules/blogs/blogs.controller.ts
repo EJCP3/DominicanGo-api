@@ -16,6 +16,15 @@ export const getBlogs = async (req: Request, res: Response, next: NextFunction) 
   }
 };
 
+export const getBlogById = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const blog = await blogsService.getBlogById(req.params.id as string);
+    res.json({ success: true, data: blog });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const postBlog = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const user = req.user!;
@@ -40,6 +49,30 @@ export const postVerifyBlog = async (req: Request, res: Response, next: NextFunc
       message: '¡Blog publicado exitosamente!',
       data: blog,
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const deleteBlog = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const id = req.params.id as string;
+    const { reason } = req.body;
+    const userRole = req.user!.role; // Because requireAuth
+    
+    await blogsService.deleteBlog(id, req.user!.id, userRole, reason);
+    res.json({ success: true, message: 'Blog eliminado correctamente' });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateBlog = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const id = req.params.id as string;
+    const dto = require('./blogs.schema').updateBlogSchema.parse(req.body);
+    const blog = await blogsService.updateBlog(id, req.user!.id, req.user!.role, dto);
+    res.json({ success: true, message: 'Blog actualizado correctamente', data: blog });
   } catch (error) {
     next(error);
   }

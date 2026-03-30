@@ -32,3 +32,6 @@ export const destinationQuerySchema = z.object({
 export type CreateDestinationDto = z.infer<typeof createDestinationSchema>;
 export type VerifyDestinationDto = z.infer<typeof verifyDestinationSchema>;
 export type DestinationQuery = z.infer<typeof destinationQuerySchema>;
+
+export const updateDestinationSchema = createDestinationSchema.partial();
+export type UpdateDestinationDto = z.infer<typeof updateDestinationSchema>;
