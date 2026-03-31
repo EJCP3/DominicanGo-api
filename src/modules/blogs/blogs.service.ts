@@ -4,6 +4,7 @@ import { sendVerificationEmail } from '../../services/mail.service';
 import { createError } from '../../middleware/error.middleware';
 import { CreateBlogDto, BlogQuery } from './blogs.schema';
 import { Prisma } from '@prisma/client';
+import { uploadBase64Image } from '../../services/minio.service';
 
 const slugify = (s: string): string =>
   s
@@ -71,6 +72,15 @@ export const createBlog = async (
 
   while (await prisma.blog.findUnique({ where: { slug } })) {
     slug = `${baseSlug}-${counter++}`;
+  }
+
+  // Upload base64 images to MinIO
+  if (dto.images && dto.images.length > 0) {
+    dto.images = await Promise.all(
+      dto.images.map((img) => 
+        img.startsWith('http') ? img : uploadBase64Image(img, 'blogs')
+      )
+    );
   }
 
   const blog = await prisma.blog.create({
@@ -158,6 +168,15 @@ export const updateBlog = async (
     while (await prisma.blog.findFirst({ where: { slug, id: { not: blogId } } })) {
       slug = `${baseSlug}-${counter++}`;
     }
+  }
+
+  // Upload base64 images to MinIO
+  if (dto.images && dto.images.length > 0) {
+    dto.images = await Promise.all(
+      dto.images.map((img) => 
+        img.startsWith('http') ? img : uploadBase64Image(img, 'blogs')
+      )
+    );
   }
 
   return await prisma.blog.update({

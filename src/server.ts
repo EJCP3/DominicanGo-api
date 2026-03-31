@@ -1,12 +1,16 @@
 import app from './app';
 import { env } from './config/env';
 import { prisma } from './lib/prisma';
+import { initializeBucket } from './services/minio.service';
 
 const startServer = async () => {
   try {
     // Verify database connection before starting
     await prisma.$connect();
     console.log('✅ Conectado a la base de datos PostgreSQL');
+
+    // Inicializar MinIO y asegurar política pública del bucket
+    await initializeBucket();
 
     app.listen(env.PORT, '0.0.0.0', () => {
       console.log(`

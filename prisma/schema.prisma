@@ -142,6 +142,8 @@ model Blog {
   content       String   // HTML o Markdown
   category      String   // "Aventura", "Cultura", "Naturaleza"
   images        String[] // URLs de imágenes del post
+  size          String?  @default("col-span-1") // Tamaño para vista Bento
+  color         String?  @default("base-100")   // Tema DaisyUI
   status        Status   @default(PENDING)
   publishedAt   DateTime? @map("published_at")
   createdAt     DateTime @default(now()) @map("created_at")

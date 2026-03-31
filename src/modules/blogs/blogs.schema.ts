@@ -1,13 +1,16 @@
 import { z } from 'zod';
+import { maxBase64Size } from '../../utils/base64Validator';
 
 export const createBlogSchema = z.object({
   title: z.string().min(5, 'El título debe tener al menos 5 caracteres'),
   excerpt: z.string().min(20, 'El resumen debe tener al menos 20 caracteres').max(300),
   content: z.string().min(100, 'El contenido debe tener al menos 100 caracteres'),
   category: z.string().min(1, 'La categoría es requerida'),
-  images: z.array(z.string()).min(1, 'Agrega al menos 1 imagen').max(10),
-  provinceId: z.string().optional(),
-  destinationId: z.string().optional(),
+  images: z.array(z.string().refine(maxBase64Size(10), 'Cada imagen no puede exceder los 10MB')).min(1, 'Agrega al menos 1 imagen').max(10),
+  provinceId: z.string().optional().transform(val => val === '' ? undefined : val),
+  destinationId: z.string().optional().transform(val => val === '' ? undefined : val),
+  size: z.string().optional(),
+  color: z.string().optional(),
 });
 
 export const verifyBlogSchema = z.object({
@@ -30,3 +33,5 @@ export type BlogQuery = z.infer<typeof blogQuerySchema>;
 
 export const updateBlogSchema = createBlogSchema.partial();
 export type UpdateBlogDto = z.infer<typeof updateBlogSchema>;
+
+// Reload trigger

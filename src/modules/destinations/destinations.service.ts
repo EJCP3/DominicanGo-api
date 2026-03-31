@@ -4,6 +4,7 @@ import { sendVerificationEmail } from '../../services/mail.service';
 import { createError } from '../../middleware/error.middleware';
 import { CreateDestinationDto, DestinationQuery } from './destinations.schema';
 import { Prisma } from '@prisma/client';
+import { uploadBase64Image } from '../../services/minio.service';
 
 /**
  * Genera un slug amigable para URL a partir de una cadena.
@@ -87,6 +88,20 @@ export const createDestination = async (
   // Asegura la unicidad del slug
   while (await prisma.destination.findUnique({ where: { slug } })) {
     slug = `${baseSlug}-${counter++}`;
+  }
+
+  // Upload base64 main image
+  if (dto.image && !dto.image.startsWith('http')) {
+    dto.image = await uploadBase64Image(dto.image, 'destinations');
+  }
+
+  // Upload base64 gallery images
+  if (dto.images && dto.images.length > 0) {
+    dto.images = await Promise.all(
+      dto.images.map((img) => 
+        img.startsWith('http') ? img : uploadBase64Image(img, 'destinations')
+      )
+    );
   }
 
   const destination = await prisma.destination.create({
@@ -203,6 +218,20 @@ export const updateDestination = async (
     while (await prisma.destination.findFirst({ where: { slug, id: { not: destinationId } } })) {
       slug = `${baseSlug}-${counter++}`;
     }
+  }
+
+  // Upload base64 main image
+  if (dto.image && !dto.image.startsWith('http')) {
+    dto.image = await uploadBase64Image(dto.image, 'destinations');
+  }
+
+  // Upload base64 gallery images
+  if (dto.images && dto.images.length > 0) {
+    dto.images = await Promise.all(
+      dto.images.map((img) => 
+        img.startsWith('http') ? img : uploadBase64Image(img, 'destinations')
+      )
+    );
   }
 
   return await prisma.destination.update({

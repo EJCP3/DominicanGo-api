@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { maxBase64Size } from '../../utils/base64Validator';
 
 export const createDestinationSchema = z.object({
   provinceId: z.string().min(1, 'La provincia es requerida'),
@@ -6,8 +7,8 @@ export const createDestinationSchema = z.object({
   type: z.enum(['playa', 'naturaleza', 'aventura', 'cultura', 'museo', 'comida', 'parque', 'tienda', 'montana']),
   price: z.enum(['gratis', 'pagado']),
   description: z.string().min(20, 'La descripción debe tener al menos 20 caracteres'),
-  image: z.string().min(1, 'La imagen principal requerida'),
-  images: z.array(z.string()).max(6, 'Máximo 6 imágenes en la galería').optional().default([]),
+  image: z.string().min(1, 'La imagen principal es requerida').refine(maxBase64Size(10), 'La imagen no puede exceder los 10MB'),
+  images: z.array(z.string().refine(maxBase64Size(10), 'Cada imagen de galería no puede exceder los 10MB')).max(6, 'Máximo 6 imágenes en la galería').optional().default([]),
   tags: z.array(z.string()).min(1, 'Agrega al menos 1 etiqueta').max(8),
   hoursWeekdays: z.string().optional(),
   hoursWeekend: z.string().optional(),
