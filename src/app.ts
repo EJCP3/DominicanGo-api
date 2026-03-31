@@ -37,8 +37,10 @@ app.use(
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: env.NODE_ENV === 'production',
-      maxAge: 1000 * 60 * 10, // 10 minutes — only needed during OAuth flow
+      secure: false,       // ← false porque el VPS corre HTTP puro (sin SSL)
+      httpOnly: true,
+      sameSite: 'lax',     // ← lax funciona en subdominios distintos sslip.io (JWT en URL)
+      maxAge: 1000 * 60 * 10, // 10 minutos — solo para el flujo OAuth temporal
     },
   })
 );
