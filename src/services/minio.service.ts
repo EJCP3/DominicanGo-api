@@ -7,7 +7,7 @@ const ENDPOINT = process.env.MINIO_ENDPOINT || 'localhost';
 const PORT = process.env.MINIO_PORT ? parseInt(process.env.MINIO_PORT, 10) : 9000;
 const ACCESS_KEY = process.env.MINIO_ACCESS_KEY || '';
 const SECRET_KEY = process.env.MINIO_SECRET_KEY || '';
-const BUCKET_NAME = process.env.MINIO_BUCKET_NAME || 'dominicango-uploads';
+const BUCKET_NAME = process.env.MINIO_BUCKET_NAME || 'dominicango';
 const USE_SSL = process.env.MINIO_USE_SSL === 'true'; // Default a false a menos que se fuerce, 9000 suele ser HTTP puro
 
 export const minioClient = new Minio.Client({
@@ -82,8 +82,8 @@ const optimizeImage = async (buffer: Buffer): Promise<Buffer> => {
  */
 export const uploadBase64Image = async (base64String: string, folder: string): Promise<string> => {
   // If the base64 contains the data URL prefix (data:image/...;base64,), strip it
-  const base64Data = base64String.includes('base64,') 
-    ? base64String.split('base64,')[1] 
+  const base64Data = base64String.includes('base64,')
+    ? base64String.split('base64,')[1]
     : base64String;
 
   // Convert string to raw Buffer
@@ -111,7 +111,7 @@ export const uploadBase64Image = async (base64String: string, folder: string): P
     // Formulate the public URL (assuming "Public Read" bucket policy)
     const protocol = USE_SSL ? 'https' : 'http';
     const publicUrl = `${protocol}://${ENDPOINT}:${PORT}/${BUCKET_NAME}/${fileName}`;
-    
+
     return publicUrl;
   } catch (error) {
     console.error('Error uploading image to MinIO:', error);
